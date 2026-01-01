@@ -1,0 +1,15 @@
+CLAUDE.md
+.claude
+.mcp.json
+prompts/
+tools/info-server/content/
+plans/
+mistakes/
+node_modules/
+dist/
+.astro/
+public/vendor/
+tests/fixtures/.gen/
+test-results/
+playwright-report/
+.env*
