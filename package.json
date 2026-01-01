@@ -1,0 +1,26 @@
+{
+  "name": "quietpdf",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node -e \"console.log('placeholder build: WS1 replaces this with copy-vendor + astro build')\"",
+    "preview": "node -e \"require('http').createServer((q,s)=>{s.writeHead(404,{'content-type':'text/plain'});s.end('placeholder preview: nothing is built yet (WS1)')}).listen(+(process.env.QP_PORT||4321),()=>console.log('placeholder preview up'))\"",
+    "fixtures": "node scripts/make-fixtures.ts",
+    "test:unit": "vitest run",
+    "test:e2e": "playwright test"
+  },
+  "dependencies": {
+    "fflate": "^0.8.3",
+    "pdf-lib": "^1.17.1",
+    "pdfjs-dist": "^6.5.438"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.14.0",
+    "@playwright/test": "^1.65.1",
+    "@types/node": "^24.0.0",
+    "jpeg-js": "^0.4.4",
+    "typescript": "^7.0.2",
+    "vitest": "^5.1.1"
+  }
+}
