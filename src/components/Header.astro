@@ -1,0 +1,100 @@
+---
+import { toolsInDemandOrder, PRESET_ROUTES } from '../content/tools';
+
+const options = [
+  ...toolsInDemandOrder().map((t) => ({ label: t.name, slug: t.slug })),
+  ...PRESET_ROUTES.map((r) => ({ label: r.h1, slug: r.slug })),
+];
+---
+
+<header class="site-header">
+  <div class="inner">
+    <a class="logo" href="/" aria-label="QuietPDF home">
+      <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+        <path d="M6 2h8l5 5v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"></path>
+        <path d="M8 13h8M8 17h5" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
+      </svg>
+      <span>QuietPDF</span>
+    </a>
+    <form class="search" role="search" data-tool-search>
+      <label class="visually-hidden" for="tool-search">Find a tool</label>
+      <input id="tool-search" type="search" list="tool-search-list" placeholder="Find a tool" autocomplete="off" />
+      <datalist id="tool-search-list">
+        {options.map((o) => <option value={o.label} data-slug={o.slug} />)}
+      </datalist>
+    </form>
+    <button type="button" class="theme-toggle" data-testid="theme-toggle" aria-label="Toggle dark mode">
+      <svg class="icon-moon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+        <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" fill="currentColor"></path>
+      </svg>
+      <svg class="icon-sun" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+        <circle cx="12" cy="12" r="4.5" fill="currentColor"></circle>
+        <path d="M12 1.5v3M12 19.5v3M1.5 12h3M19.5 12h3M4.6 4.6l2.1 2.1M17.3 17.3l2.1 2.1M4.6 19.4l2.1-2.1M17.3 6.7l2.1-2.1" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
+      </svg>
+    </button>
+  </div>
+</header>
+
+<style>
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+  }
+  .inner {
+    max-width: var(--content-width);
+    margin: 0 auto;
+    height: var(--header-height);
+    padding: 0 var(--space-4);
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+  }
+  .logo {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-weight: 700;
+    color: var(--text);
+    text-decoration: none;
+  }
+  .search {
+    flex: 1;
+    display: flex;
+    justify-content: flex-end;
+  }
+  .search input {
+    width: 100%;
+    max-width: 18rem;
+    min-width: 0;
+    height: 2.25rem;
+    padding: 0 var(--space-3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-s);
+    background: var(--bg);
+    color: var(--text);
+    font: inherit;
+  }
+  .theme-toggle {
+    width: 2.5rem;
+    height: 2.5rem;
+    display: inline-grid;
+    place-items: center;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-s);
+    background: transparent;
+    color: var(--text);
+    cursor: pointer;
+  }
+  .icon-sun {
+    display: none;
+  }
+  :global(html[data-theme='dark']) .icon-sun {
+    display: block;
+  }
+  :global(html[data-theme='dark']) .icon-moon {
+    display: none;
+  }
+</style>
