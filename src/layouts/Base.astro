@@ -1,0 +1,67 @@
+---
+import '../styles/global.css';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+
+interface Props {
+  title: string;
+  description: string;
+  /** Canonical path, e.g. "/merge-pdf". Defaults to the current path. */
+  canonical?: string;
+  noindex?: boolean;
+}
+
+const { title, description, canonical, noindex = false } = Astro.props;
+const path = canonical ?? (Astro.url.pathname.replace(/\.html$/, '').replace(/\/index$/, '/') || '/');
+const canonicalUrl = new URL(path, Astro.site).href;
+---
+
+<!doctype html>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalUrl} />
+    {noindex && <meta name="robots" content="noindex" />}
+    <meta name="referrer" content="no-referrer" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#2a5bd7" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <!-- Blocking, external (CSP has no inline scripts): sets html[data-theme] before first paint. -->
+    <script is:inline src="/theme.js"></script>
+    <slot name="head" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <Header />
+    <main id="main">
+      <slot />
+    </main>
+    <Footer />
+    <div id="privacy-meter-root"></div>
+    <div id="install-prompt-root"></div>
+    <script>
+      import '../scripts/app.ts';
+    </script>
+  </body>
+</html>
+
+<style is:global>
+  .skip-link {
+    position: absolute;
+    left: var(--space-2);
+    top: -3rem;
+    padding: var(--space-2) var(--space-3);
+    background: var(--surface);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-s);
+    z-index: 100;
+  }
+  .skip-link:focus {
+    top: var(--space-2);
+  }
+</style>
