@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://quietpdf.pages.dev/sitemap-index.xml
