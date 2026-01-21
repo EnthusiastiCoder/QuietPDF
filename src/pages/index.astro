@@ -1,0 +1,95 @@
+---
+import Base from '../layouts/Base.astro';
+import { CATEGORIES, toolsInDemandOrder } from '../content/tools';
+
+const tools = toolsInDemandOrder();
+// Popular first, then the other categories; inside each group, demand order.
+const groups = CATEGORIES.map((c) => ({ ...c, tools: tools.filter((t) => t.category === c.id) })).filter((g) => g.tools.length > 0);
+---
+
+<Base
+  title="QuietPDF - free PDF tools that never upload your files"
+  description="Merge, compress, convert, split, sign and OCR PDFs in your browser. Nothing is uploaded: your files stay on your device. Free, no signup, works offline."
+  canonical="/"
+>
+  <section class="hero">
+    <h1>PDF tools that never upload your files</h1>
+    <p class="lead">Everything runs in your browser. Free, no signup, no limits, and it keeps working offline.</p>
+  </section>
+
+  <div class="tool-grid" data-testid="tool-grid">
+    {
+      groups.map((g) => (
+        <section class="group" aria-labelledby={`cat-${g.id}`}>
+          <h2 id={`cat-${g.id}`}>{g.label}</h2>
+          <ul class="cards">
+            {g.tools.map((t) => (
+              <li>
+                <a class="tool-card card" data-testid="tool-card" href={`/${t.slug}`}>
+                  <span class="icon" aria-hidden="true">
+                    {t.icon}
+                  </span>
+                  <span class="name">{t.name}</span>
+                  <span class="summary">{t.summary}</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ))
+    }
+  </div>
+</Base>
+
+<style>
+  .hero {
+    padding: var(--space-5) 0 var(--space-4);
+  }
+  .group {
+    margin-bottom: var(--space-5);
+  }
+  .group h2 {
+    font-size: var(--step-1);
+    color: var(--text-muted);
+  }
+  .cards {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+    gap: var(--space-3);
+  }
+  .tool-card {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    grid-template-rows: auto auto;
+    gap: var(--space-1) var(--space-3);
+    height: 100%;
+    padding: var(--space-4);
+    color: var(--text);
+    text-decoration: none;
+  }
+  .tool-card:hover {
+    border-color: var(--accent);
+  }
+  .icon {
+    grid-row: span 2;
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: var(--radius-s);
+    background: var(--accent-soft);
+    color: var(--accent-strong);
+    font-size: 0.7rem;
+    font-weight: 700;
+  }
+  .name {
+    font-weight: 650;
+  }
+  .summary {
+    color: var(--text-muted);
+    font-size: var(--step--1);
+  }
+</style>
