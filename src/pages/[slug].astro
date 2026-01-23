@@ -1,0 +1,78 @@
+---
+/**
+ * Every tool route (the 15 tools, the Organize presets and the search aliases)
+ * from the registry. The H1 and summary are server-rendered; the tool UI is a
+ * Svelte component mounted from a bundled module (no islands: their inline
+ * bootstrap script would break `script-src 'self'`).
+ */
+import Base from '../layouts/Base.astro';
+import { allToolRoutes, toolById, type ToolRoute } from '../content/tools';
+
+export function getStaticPaths() {
+  return allToolRoutes().map((route) => ({ params: { slug: route.slug }, props: { route } }));
+}
+
+interface Props {
+  route: ToolRoute;
+}
+
+const { route } = Astro.props;
+const tool = toolById(route.tool);
+const title = route.slug === tool.slug ? tool.title : `${route.h1} - free, private, in your browser | QuietPDF`;
+const description =
+  route.slug === tool.slug ? tool.description : `${route.summary} Runs entirely in your browser: no upload, no signup, no limits.`;
+const canonical = `/${route.canonical ?? route.slug}`;
+---
+
+<Base title={title} description={description} canonical={canonical}>
+  <section class="tool-head">
+    <h1>{route.h1}</h1>
+    <p class="summary">{route.summary}</p>
+  </section>
+  <div
+    class="tool-root"
+    data-tool-root
+    data-tool={route.tool}
+    data-preset={route.preset ?? ''}
+    data-accept={tool.accept}
+    data-multiple={tool.multiple ? 'true' : 'false'}
+  >
+  </div>
+</Base>
+
+<script>
+  import { mount } from 'svelte';
+  import { loadTool } from '../components/tools/index';
+  import type { Accept, ToolComponent } from '../content/tools';
+
+  const root = document.querySelector<HTMLElement>('[data-tool-root]');
+  if (root) {
+    const id = root.dataset.tool as ToolComponent;
+    void loadTool(id).then(({ default: Tool }) => {
+      mount(Tool, {
+        target: root,
+        props: {
+          preset: root.dataset.preset || undefined,
+          accept: (root.dataset.accept as Accept) ?? 'pdf',
+          multiple: root.dataset.multiple === 'true',
+        },
+      });
+    });
+  }
+</script>
+
+<style>
+  .tool-head {
+    padding: var(--space-4) 0 var(--space-3);
+  }
+  .tool-head h1 {
+    margin: 0 0 var(--space-2);
+  }
+  .summary {
+    margin: 0;
+    color: var(--text-muted);
+  }
+  .tool-root {
+    min-height: 11rem;
+  }
+</style>
