@@ -1,0 +1,28 @@
+---
+import Base from '../layouts/Base.astro';
+---
+
+<Base
+  title="Privacy - QuietPDF never uploads your files"
+  description="How QuietPDF keeps your files on your device, and how to verify it yourself with your browser's developer tools."
+>
+  <article class="prose">
+    <h1>Privacy</h1>
+    <p>QuietPDF processes every file inside your browser. Your files are never uploaded: there is no server that could receive them.</p>
+    <h2>Verify it yourself</h2>
+    <ol>
+      <li>Open your browser's developer tools and switch to the Network tab.</li>
+      <li>Add a file to any tool and run it.</li>
+      <li>Every request you see goes to this site only, and none of them carries your file.</li>
+    </ol>
+    <p>The privacy meter at the bottom of every page counts third-party requests and uploaded bytes live. Both stay at zero.</p>
+    <p>The full policy, including the exact Content-Security-Policy this site sends, is being finished.</p>
+  </article>
+</Base>
+
+<style>
+  .prose {
+    max-width: 42rem;
+    padding: var(--space-4) 0;
+  }
+</style>
