@@ -1,9 +1,8 @@
 import { defineConfig, devices } from '@playwright/test';
 
-// Minimal harness written with the failing tests (before WS1).
-// WS1 owns this file: it adds globalSetup (tests/fixtures/.gen/ large fixtures)
-// and keeps the projects and webServer below as the plan specifies.
-const PORT = Number(process.env.QP_PORT ?? 4321);
+// QuietPDF's own fixed port. Other local projects own 4321 (Nopload),
+// 4799 (Framelab), 4173 (JEE Quest) and 4391 (ForeverQR): never share one.
+const PORT = Number(process.env.QP_PORT ?? 4399);
 
 export default defineConfig({
   testDir: './tests/e2e',
@@ -11,6 +10,7 @@ export default defineConfig({
   expect: { timeout: 10_000 },
   fullyParallel: true,
   reporter: [['list']],
+  globalSetup: './tests/global-setup.ts',
   use: {
     baseURL: `http://localhost:${PORT}`,
     acceptDownloads: true,
@@ -24,10 +24,11 @@ export default defineConfig({
   ],
   webServer: {
     command: 'npm run build && npm run preview',
-    // Wait on the port, not a URL: the pre-WS1 placeholder preview answers 404
-    // everywhere, and the tests must then fail on the missing behaviour.
+    env: { QP_PORT: String(PORT) },
     port: PORT,
-    reuseExistingServer: !process.env.CI,
+    // Never reuse a running server: if the port is busy, fail rather than
+    // test whatever else is listening there.
+    reuseExistingServer: false,
     timeout: 300_000,
   },
 });
