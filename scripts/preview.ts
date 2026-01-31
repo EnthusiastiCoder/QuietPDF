@@ -5,14 +5,14 @@
  *  - clean URLs: /merge-pdf serves merge-pdf.html, / serves index.html;
  *  - unknown paths get 404.html with status 404.
  *
- * Usage: node scripts/preview.ts   (port: QP_PORT, default 4399)
+ * Usage: node scripts/preview.ts   (port: QP_PORT, default 4451)
  */
 import { createServer } from 'node:http';
 import { existsSync, readFileSync, statSync, createReadStream } from 'node:fs';
 import { extname, join, normalize, resolve, sep } from 'node:path';
 
 const ROOT = resolve(process.cwd(), 'dist');
-const PORT = Number(process.env.QP_PORT ?? 4399);
+const PORT = Number(process.env.QP_PORT ?? 4451);
 
 const MIME: Record<string, string> = {
   '.html': 'text/html; charset=utf-8',
