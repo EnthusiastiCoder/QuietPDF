@@ -10,6 +10,8 @@ export default defineConfig({
   timeout: 60_000,
   expect: { timeout: 10_000 },
   fullyParallel: true,
+  // RAM on the dev machine is tight: one worker unless overridden.
+  workers: process.env.CI ? undefined : 1,
   reporter: [['list']],
   globalSetup: './tests/global-setup.ts',
   use: {
