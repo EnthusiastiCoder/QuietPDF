@@ -13,6 +13,8 @@ export default defineConfig({
   site,
   output: 'static',
   trailingSlash: 'never',
+  // QuietPDF's own port (4321 is Nopload's): dev and astro preview use 4451.
+  server: { port: 4451 },
   build: {
     format: 'file',
     inlineStylesheets: 'never',
