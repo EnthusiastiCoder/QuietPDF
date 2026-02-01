@@ -93,7 +93,7 @@ function wrapSenders(): void {
     return origFetch(input, init);
   };
   const origSend = XMLHttpRequest.prototype.send;
-  XMLHttpRequest.prototype.send = function (body?: Document | XMLHttpRequestBodyInit | null) {
+  XMLHttpRequest.prototype.send = function (body?: XMLHttpRequestBodyInit | null) {
     countUpload(bodySize(body));
     return origSend.call(this, body);
   };
