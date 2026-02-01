@@ -1,8 +1,9 @@
 import { defineConfig, devices } from '@playwright/test';
 
 // QuietPDF's own fixed port. Other local projects own 4321 (Nopload),
-// 4799 (Framelab), 4173 (JEE Quest) and 4391 (ForeverQR): never share one.
-const PORT = Number(process.env.QP_PORT ?? 4399);
+// 4799 (Framelab), 4173 (JEE Quest), 4391 (ForeverQR) and 4399/4400: never
+// share one.
+const PORT = Number(process.env.QP_PORT ?? 4451);
 
 export default defineConfig({
   testDir: './tests/e2e',
