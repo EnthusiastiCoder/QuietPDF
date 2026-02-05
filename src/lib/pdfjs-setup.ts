@@ -85,22 +85,21 @@ async function getWorker(): Promise<InstanceType<Pdfjs['PDFWorker']>> {
   return worker;
 }
 
-const idle = (fn: () => void) =>
-  typeof requestIdleCallback === 'function' ? requestIdleCallback(fn, { timeout: 3000 }) : setTimeout(fn, 200);
-
-let warmed = false;
+let warming: Promise<void> | null = null;
 /**
- * Loads the library and its worker now and prefetches the binary data at idle
- * time. Tools call this on mount, before any file is added.
+ * Loads the library and its worker and prefetches the binary data into memory.
+ * Resolves when everything is in memory, so a tool can offer its drop zone only
+ * once adding a file makes no network request. Tools call this on mount.
  */
-export async function warmPdfjs(): Promise<void> {
-  await getWorker();
-  if (warmed) return;
-  warmed = true;
-  idle(() => {
-    for (const f of WASM_FILES) void fetchBytes(`${WASM_URL}${f}`).catch(() => {});
-    for (const f of STANDARD_FONTS) void fetchBytes(`${FONT_URL}${f}`).catch(() => {});
-  });
+export function warmPdfjs(): Promise<void> {
+  warming ??= (async () => {
+    await getWorker();
+    await Promise.allSettled([
+      ...WASM_FILES.map((f) => fetchBytes(`${WASM_URL}${f}`)),
+      ...STANDARD_FONTS.map((f) => fetchBytes(`${FONT_URL}${f}`)),
+    ]);
+  })();
+  return warming;
 }
 
 export interface OpenOptions {
@@ -175,4 +174,9 @@ export async function renderThumb(doc: PDFDocumentProxy, n: number, width = 160,
   } finally {
     page.cleanup();
   }
+}
+
+/** Releases a document's memory (the document proxy has no destroy of its own). */
+export function closePdf(doc: PDFDocumentProxy | null | undefined): void {
+  void doc?.loadingTask?.destroy().catch(() => {});
 }
