@@ -10,6 +10,7 @@ export function registerServiceWorker(): void {
       /* offline support is a bonus: never break the page */
     });
   };
-  if (document.readyState === 'complete') go();
-  else window.addEventListener('load', go, { once: true });
+  // Register at once, not on load: the install downloads the precache and
+  // should be finished before the user has chosen a file.
+  go();
 }
