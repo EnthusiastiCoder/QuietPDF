@@ -48,7 +48,7 @@ export default defineConfig({
         swSrc: 'src/sw.ts',
         globPatterns: ['**/*.{html,js,mjs,css,woff2,wasm,svg,bcmap,pfb,ttf,icc,txt,webmanifest}'],
         // OCR language data is runtime-cached (CacheFirst) by the service worker.
-        globIgnores: ['vendor/tesseract/lang/**', 'sw.js', 'manifest.webmanifest'],
+        globIgnores: ['vendor/tesseract/lang/**', 'vendor/pdfjs/cmaps/**', 'vendor/pdfjs/standard_fonts/**', 'vendor/pdfjs/wasm/**', 'vendor/qpdf/**', 'vendor/tesseract/core/**', 'vendor/tesseract/worker.min.js', 'sw.js', 'manifest.webmanifest'],
       },
       devOptions: { enabled: false },
     }),
