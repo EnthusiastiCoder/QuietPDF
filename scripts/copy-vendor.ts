@@ -37,6 +37,7 @@ const COPIES: Copy[] = [
   { from: 'tesseract.js-core/tesseract-core-simd-lstm.wasm.js', to: 'tesseract/core/tesseract-core-simd-lstm.wasm.js' },
   { from: 'tesseract.js-core/tesseract-core-relaxedsimd-lstm.wasm.js', to: 'tesseract/core/tesseract-core-relaxedsimd-lstm.wasm.js' },
   { from: '@tesseract.js-data/eng/4.0.0_best_int/eng.traineddata.gz', to: 'tesseract/lang/eng.traineddata.gz' },
+  { from: '@fontsource/dancing-script/files/dancing-script-latin-400-normal.woff', to: 'fonts/dancing-script.woff' },
   { from: '@tesseract.js-data/hin/4.0.0/hin.traineddata.gz', to: 'tesseract/lang/hin.traineddata.gz' },
 ];
 
