@@ -2,6 +2,7 @@
   import { onMount } from 'svelte';
   import { isImageFile, isPdfFile } from '../lib/download';
   import { markFileAdded } from '../lib/privacy-meter';
+  import { warmPdfjs } from '../lib/pdfjs-setup';
 
   interface Props {
     accept: 'pdf' | 'image';
@@ -15,6 +16,9 @@
   let { accept, multiple = false, onfiles, compact = false }: Props = $props();
 
   let over = $state(false);
+  // Offered once warm-up is done (offline copy installed, pdf.js data in memory),
+  // so that adding a file never triggers a download. Capped so a failure cannot block.
+  let ready = $state(false);
   let error = $state('');
   let input: HTMLInputElement;
 
@@ -60,6 +64,12 @@
   }
 
   onMount(() => {
+    const sw = 'serviceWorker' in navigator && !import.meta.env.DEV ? navigator.serviceWorker.ready : Promise.resolve();
+    const warm = Promise.allSettled([sw, accept === 'pdf' ? warmPdfjs() : Promise.resolve()]);
+    void Promise.race([warm, new Promise((r) => setTimeout(r, 10_000))]).then(() => (ready = true));
+  });
+
+  onMount(() => {
     // Paste from the clipboard anywhere on the page (decision 16).
     const onPaste = (e: ClipboardEvent) => {
       const target = e.target as HTMLElement | null;
@@ -79,6 +89,7 @@
   class="drop"
   class:over
   class:compact
+  class:pending={!ready}
   data-testid="drop-zone"
   role="group"
   aria-label={`Add ${kind} files`}
@@ -115,6 +126,9 @@
 </div>
 
 <style>
+  .drop.pending {
+    visibility: hidden;
+  }
   .drop {
     position: relative;
     display: flex;
