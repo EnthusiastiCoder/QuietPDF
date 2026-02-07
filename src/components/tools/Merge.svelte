@@ -5,8 +5,10 @@
   import ThumbGrid, { type ThumbItem } from '../ThumbGrid.svelte';
   import ProgressBar from '../ProgressBar.svelte';
   import ResultCard from '../ResultCard.svelte';
-  import { openPdf, renderThumb, warmPdfjs } from '../../lib/pdfjs-setup';
-  import { formatBytes, readFile } from '../../lib/download';
+  import { closePdf, renderThumb, warmPdfjs } from '../../lib/pdfjs-setup';
+  import { formatBytes } from '../../lib/download';
+  import PasswordPrompt from '../PasswordPrompt.svelte';
+  import { intakePdf } from '../../lib/password-prompt.svelte';
   import { mergePdfs } from '../../core/merge';
   import type { ToolProps } from './index';
 
@@ -44,7 +46,7 @@
   });
 
   onDestroy(() => {
-    for (const e of entries) void e.doc?.destroy();
+    for (const e of entries) closePdf(e.doc);
   });
 
   async function addFiles(files: File[]): Promise<void> {
@@ -55,20 +57,16 @@
     const failed: string[] = [];
     for (const file of files) {
       try {
-        const bytes = await readFile(file);
-        let doc: PDFDocumentProxy | null = null;
-        let pages = 0;
+        let intake;
         try {
-          doc = await openPdf(bytes);
-          pages = doc.numPages;
-        } catch (e) {
-          if ((e as { name?: string }).name === 'PasswordException') {
-            failed.push(`${file.name} is password-protected: unlock it first.`);
-            continue;
-          }
+          intake = await intakePdf(file);
+        } catch {
           failed.push(`${file.name} could not be read as a PDF.`);
           continue;
         }
+        if (!intake) continue;
+        const { bytes, doc } = intake;
+        const pages = doc.numPages;
         added.push({ id: `f${++seq}`, name: file.name, bytes, pages, doc });
       } finally {
         loading -= 1;
@@ -86,7 +84,7 @@
 
   function remove(id: string): void {
     const e = entries.find((x) => x.id === id);
-    void e?.doc?.destroy();
+    closePdf(e?.doc);
     entries = entries.filter((x) => x.id !== id);
     result = null;
   }
@@ -109,12 +107,14 @@
   }
 
   function restart(): void {
-    for (const e of entries) void e.doc?.destroy();
+    for (const e of entries) closePdf(e.doc);
     entries = [];
     result = null;
     error = '';
   }
 </script>
+
+<PasswordPrompt />
 
 {#if result}
   <ResultCard bytes={result} filename="merged.pdf" title="Your merged PDF is ready" onrestart={restart}>
