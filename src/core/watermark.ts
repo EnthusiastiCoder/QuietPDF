@@ -1,4 +1,4 @@
-import { PDFDocument, StandardFonts, degrees, rgb } from 'pdf-lib';
+import { PDFArray, PDFDocument, StandardFonts, degrees, rgb } from 'pdf-lib';
 import { pageSet } from '../lib/ranges';
 import { imageKind, rasterize } from '../lib/exif';
 
@@ -11,6 +11,8 @@ export interface WatermarkOptions {
   /** Degrees, counter-clockwise. */
   rotation: number;
   position: 'center' | 'tiled';
+  /** Stack the mark over the page content (default) or behind it. */
+  layer?: 'over' | 'behind';
   /** Page range text; empty means all pages. */
   range?: string;
   fontSize?: number;
@@ -41,6 +43,16 @@ export async function addWatermark(bytes: Uint8Array, o: WatermarkOptions): Prom
     draw(cx - (w / 2) * cos + (h / 2) * sin, cy - (w / 2) * sin - (h / 2) * cos);
   };
 
+  /** pdf-lib appends the mark's stream last; move it first so the page paints over it. */
+  const toBack = (page: (typeof pages)[number]) => {
+    if (o.layer !== 'behind') return;
+    const contents = page.node.Contents();
+    if (!(contents instanceof PDFArray) || contents.size() < 2) return;
+    const last = contents.get(contents.size() - 1);
+    contents.remove(contents.size() - 1);
+    contents.insert(0, last);
+  };
+
   pages.forEach((page, i) => {
     if (wanted && !wanted.has(i + 1)) return;
     const { width, height } = page.getSize();
@@ -57,6 +69,7 @@ export async function addWatermark(bytes: Uint8Array, o: WatermarkOptions): Prom
           );
         }
       }
+      toBack(page);
       return;
     }
     const text = (o.text as string).trim();
@@ -78,6 +91,7 @@ export async function addWatermark(bytes: Uint8Array, o: WatermarkOptions): Prom
       const extent = Math.abs(w * cos) + Math.abs(h * sin);
       draw(width / 2, height / 2, extent > width * 0.9 ? (base * width * 0.9) / extent : base);
     }
+    toBack(page);
   });
   return doc.save();
 }
