@@ -17,10 +17,6 @@ declare const self: ServiceWorkerGlobalScope & { __WB_MANIFEST: Array<{ url: str
 
 const LANG_CACHE = 'qp-ocr-lang-v1';
 const LANG_PATH = '/vendor/tesseract/lang/';
-// CJK character maps: 170 small files, only needed for some PDFs, so they are
-// cached the first time a PDF asks for one instead of being precached.
-const CMAP_PATH = '/vendor/pdfjs/';
-const HEAVY = [CMAP_PATH + 'cmaps/', CMAP_PATH + 'standard_fonts/', CMAP_PATH + 'wasm/', '/vendor/qpdf/', '/vendor/tesseract/core/', '/vendor/tesseract/worker.min.js'];
 
 self.addEventListener('install', () => {
   // The first install takes control at once; updates wait for the prompt.
@@ -52,7 +48,7 @@ self.addEventListener('fetch', (event) => {
 // 2. OCR language data: CacheFirst.
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
-  if (event.request.method !== 'GET' || url.origin !== self.location.origin || !(url.pathname.startsWith(LANG_PATH) || HEAVY.some((h) => url.pathname.startsWith(h)))) return;
+  if (event.request.method !== 'GET' || url.origin !== self.location.origin || !url.pathname.startsWith(LANG_PATH)) return;
   event.respondWith(
     (async () => {
       const cache = await caches.open(LANG_CACHE);
