@@ -20,6 +20,7 @@
   let opacity = $state(30);
   let rotation = $state(45);
   let position = $state<'center' | 'tiled'>('center');
+  let layer = $state<'over' | 'behind'>('over');
   let range = $state('');
   let busy = $state(false);
   let error = $state('');
@@ -78,6 +79,7 @@
         opacity: Math.min(100, Math.max(0, opacity)) / 100,
         rotation,
         position,
+        layer,
         range,
       });
       result = { bytes, name: suffixed(file.name, 'watermarked') };
@@ -131,6 +133,13 @@
           <select id="wm-pos" bind:value={position}>
             <option value="center">Centre</option>
             <option value="tiled">Tiled (3 x 3)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="wm-layer">Layer</label>
+          <select id="wm-layer" bind:value={layer}>
+            <option value="over">Over the content</option>
+            <option value="behind">Behind the content</option>
           </select>
         </div>
         <div class="field">
