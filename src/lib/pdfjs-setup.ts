@@ -122,6 +122,7 @@ export async function openPdf(data: Uint8Array | ArrayBuffer, opts: OpenOptions 
     iccUrl: ICC_URL,
     useWorkerFetch: false,
     BinaryDataFactory: CachedBinaryDataFactory,
+    useSystemFonts: false,
     enableXfa: false,
     disableAutoFetch: true,
     disableStream: true,
