@@ -11,9 +11,16 @@
     onfiles: (files: File[]) => void;
     /** Compact variant shown once files are added ("Add more files"). */
     compact?: boolean;
+    /**
+     * Extra warm-up the tool needs before a file may be added (engine WASM,
+     * OCR language data), so adding a file never triggers a download.
+     */
+    warmup?: () => Promise<unknown>;
+    /** Upper bound on the warm-up wait, in ms (a failure must not block the page). */
+    warmupTimeout?: number;
   }
 
-  let { accept, multiple = false, onfiles, compact = false }: Props = $props();
+  let { accept, multiple = false, onfiles, compact = false, warmup, warmupTimeout = 10_000 }: Props = $props();
 
   let over = $state(false);
   // Offered once warm-up is done (offline copy installed, pdf.js data in memory),
@@ -65,8 +72,8 @@
 
   onMount(() => {
     const sw = 'serviceWorker' in navigator && !import.meta.env.DEV ? navigator.serviceWorker.ready : Promise.resolve();
-    const warm = Promise.allSettled([sw, accept === 'pdf' ? warmPdfjs() : Promise.resolve()]);
-    void Promise.race([warm, new Promise((r) => setTimeout(r, 10_000))]).then(() => (ready = true));
+    const warm = Promise.allSettled([sw, accept === 'pdf' ? warmPdfjs() : Promise.resolve(), warmup ? warmup() : Promise.resolve()]);
+    void Promise.race([warm, new Promise((r) => setTimeout(r, warmupTimeout))]).then(() => (ready = true));
   });
 
   onMount(() => {
