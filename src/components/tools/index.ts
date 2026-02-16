@@ -19,7 +19,7 @@ const placeholder: Loader = () => import('./Placeholder.svelte');
 
 export const TOOL_LOADERS: Record<ToolComponent, Loader> = {
   'images-to-pdf': () => import('./ImagesToPdf.svelte'),
-  'pdf-to-word': placeholder,
+  'pdf-to-word': () => import('./PdfToWord.svelte'),
   merge: () => import('./Merge.svelte'),
   compress: placeholder,
   split: () => import('./Split.svelte'),
