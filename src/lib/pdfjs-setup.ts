@@ -123,6 +123,8 @@ export async function openPdf(data: Uint8Array | ArrayBuffer, opts: OpenOptions 
     useWorkerFetch: false,
     BinaryDataFactory: CachedBinaryDataFactory,
     useSystemFonts: false,
+    // Keeps the PDF font name on font objects: PDF to Word reads bold/italic from it.
+    fontExtraProperties: true,
     enableXfa: false,
     disableAutoFetch: true,
     disableStream: true,
@@ -180,4 +182,17 @@ export async function renderThumb(doc: PDFDocumentProxy, n: number, width = 160,
 /** Releases a document's memory (the document proxy has no destroy of its own). */
 export function closePdf(doc: PDFDocumentProxy | null | undefined): void {
   void doc?.loadingTask?.destroy().catch(() => {});
+}
+
+/**
+ * Maps a PDF-space rectangle [x0, y0, x1, y1] to viewport pixels (pdf.js 6
+ * dropped PageViewport.convertToViewportRectangle). Returns [x0, y0, x1, y1].
+ */
+export function viewportRect(
+  viewport: { convertToViewportPoint(x: number, y: number): number[] },
+  rect: [number, number, number, number] | number[],
+): [number, number, number, number] {
+  const [ax, ay] = viewport.convertToViewportPoint(rect[0], rect[1]);
+  const [bx, by] = viewport.convertToViewportPoint(rect[2], rect[3]);
+  return [ax, ay, bx, by];
 }
