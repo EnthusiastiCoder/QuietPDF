@@ -5,7 +5,7 @@
   import PasswordPrompt from '../PasswordPrompt.svelte';
   import ProgressBar from '../ProgressBar.svelte';
   import ResultCard from '../ResultCard.svelte';
-  import { closePdf, renderPage } from '../../lib/pdfjs-setup';
+  import { closePdf, renderPage, viewportRect } from '../../lib/pdfjs-setup';
   import { intakePdf } from '../../lib/password-prompt.svelte';
   import { formatBytes, suffixed } from '../../lib/download';
   import { handOff } from '../../lib/handoff';
@@ -59,7 +59,7 @@
       const [vx, vy] = page.view;
       const out: (PngImage | null)[] = [];
       for (const b of boxes) {
-        const [x0, y0, x1, y1] = viewport.convertToViewportRectangle([b.x + vx, b.y + vy, b.x + vx + b.width, b.y + vy + b.height]);
+        const [x0, y0, x1, y1] = viewportRect(viewport, [b.x + vx, b.y + vy, b.x + vx + b.width, b.y + vy + b.height]);
         const left = Math.max(0, Math.floor(Math.min(x0, x1)));
         const top = Math.max(0, Math.floor(Math.min(y0, y1)));
         const w = Math.min(canvas.width - left, Math.ceil(Math.abs(x1 - x0)));
