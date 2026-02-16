@@ -260,7 +260,7 @@ export function linesToBlocks(lines: Line[], docMedian: number): TextBlock[] {
 }
 
 function mergeByTop<I extends ImageBox>(texts: TextBlock[], images: I[]): Block<I>[] {
-  const imgs: ImageBlock<I>[] = images.map((image) => ({ kind: 'image', image, top: image.y + image.height })).sort((a, b) => b.top - a.top);
+  const imgs: ImageBlock<I>[] = images.map((image) => ({ kind: 'image' as const, image, top: image.y + image.height })).sort((a, b) => b.top - a.top);
   const out: Block<I>[] = [];
   let i = 0;
   for (const t of texts) {
@@ -327,6 +327,20 @@ interface FontInfoLike {
   bold?: boolean;
   black?: boolean;
   italic?: boolean;
+  /** The PDF font name (e.g. "ABCDEF+Arial-BoldMT"); present with fontExtraProperties. */
+  name?: string;
+}
+
+/**
+ * pdf.js sets .bold/.italic only when it falls back to a system font; when the
+ * font data is available (the browser) the PDF font name tells instead.
+ */
+export function fontStyle(font: FontInfoLike | undefined): { bold: boolean; italic: boolean } {
+  const name = typeof font?.name === 'string' ? font.name.replace(/^[A-Z]{6}\+/, '') : '';
+  return {
+    bold: !!(font?.bold || font?.black) || /bold|black|heavy|semibold|demibold/i.test(name),
+    italic: !!font?.italic || /italic|oblique/i.test(name),
+  };
 }
 
 /**
@@ -338,8 +352,29 @@ export async function extractPage(page: PDFPageProxy, opts: { images?: boolean }
   // The operator list loads the fonts into commonObjs (for bold/italic) and lists image placements.
   const ops = await page.getOperatorList();
   const tc = await page.getTextContent({ includeMarkedContent: false });
+  const rawItems = tc.items as { str?: string; transform?: number[]; width?: number; height?: number; fontName?: string }[];
+  // In the browser a font object is resolved only once its font face has loaded,
+  // which can be after getOperatorList returns: wait for each one (briefly).
+  const fontNames = [...new Set(rawItems.map((r) => r.fontName).filter((n): n is string => !!n))];
+  await Promise.all(
+    fontNames.map(
+      (name) =>
+        new Promise<void>((resolve) => {
+          const timer = setTimeout(resolve, 2000);
+          try {
+            page.commonObjs.get(name, () => {
+              clearTimeout(timer);
+              resolve();
+            });
+          } catch {
+            clearTimeout(timer);
+            resolve();
+          }
+        }),
+    ),
+  );
   const items: TextItemIn[] = [];
-  for (const raw of tc.items as { str?: string; transform?: number[]; width?: number; height?: number; fontName?: string }[]) {
+  for (const raw of rawItems) {
     if (typeof raw.str !== 'string' || !raw.transform || !raw.str) continue;
     let font: FontInfoLike | undefined;
     try {
@@ -349,14 +384,15 @@ export async function extractPage(page: PDFPageProxy, opts: { images?: boolean }
     }
     const t = raw.transform;
     const size = raw.height || Math.hypot(t[2], t[3]) || 12;
+    const style = fontStyle(font);
     items.push({
       str: raw.str,
       x: t[4] - x0,
       y: t[5] - y0,
       width: raw.width ?? 0,
       size,
-      bold: !!(font?.bold || font?.black),
-      italic: !!font?.italic,
+      bold: style.bold,
+      italic: style.italic,
     });
   }
   const images: ImageBox[] = [];
