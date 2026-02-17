@@ -32,7 +32,7 @@ export const TOOL_LOADERS: Record<ToolComponent, Loader> = {
   watermark: () => import('./Watermark.svelte'),
   ocr: placeholder,
   redact: placeholder,
-  'pdf-to-text': placeholder,
+  'pdf-to-text': () => import('./PdfToText.svelte'),
 };
 
 export function loadTool(id: ToolComponent): Promise<{ default: Component<ToolProps> }> {
