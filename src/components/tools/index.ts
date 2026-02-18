@@ -26,7 +26,7 @@ export const TOOL_LOADERS: Record<ToolComponent, Loader> = {
   'pdf-to-images': () => import('./PdfToImages.svelte'),
   organize: () => import('./Organize.svelte'),
   sign: () => import('./Sign.svelte'),
-  protect: placeholder,
+  protect: () => import('./Protect.svelte'),
   unlock: placeholder,
   'page-numbers': () => import('./PageNumbers.svelte'),
   watermark: () => import('./Watermark.svelte'),
