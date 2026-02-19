@@ -27,7 +27,7 @@ export const TOOL_LOADERS: Record<ToolComponent, Loader> = {
   organize: () => import('./Organize.svelte'),
   sign: () => import('./Sign.svelte'),
   protect: () => import('./Protect.svelte'),
-  unlock: placeholder,
+  unlock: () => import('./Unlock.svelte'),
   'page-numbers': () => import('./PageNumbers.svelte'),
   watermark: () => import('./Watermark.svelte'),
   ocr: placeholder,
