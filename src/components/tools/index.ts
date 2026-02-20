@@ -21,7 +21,7 @@ export const TOOL_LOADERS: Record<ToolComponent, Loader> = {
   'images-to-pdf': () => import('./ImagesToPdf.svelte'),
   'pdf-to-word': () => import('./PdfToWord.svelte'),
   merge: () => import('./Merge.svelte'),
-  compress: placeholder,
+  compress: () => import('./Compress.svelte'),
   split: () => import('./Split.svelte'),
   'pdf-to-images': () => import('./PdfToImages.svelte'),
   organize: () => import('./Organize.svelte'),
