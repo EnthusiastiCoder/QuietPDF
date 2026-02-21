@@ -30,7 +30,7 @@ export const TOOL_LOADERS: Record<ToolComponent, Loader> = {
   unlock: () => import('./Unlock.svelte'),
   'page-numbers': () => import('./PageNumbers.svelte'),
   watermark: () => import('./Watermark.svelte'),
-  ocr: placeholder,
+  ocr: () => import('./Ocr.svelte'),
   redact: placeholder,
   'pdf-to-text': () => import('./PdfToText.svelte'),
 };
