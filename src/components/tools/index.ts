@@ -31,7 +31,7 @@ export const TOOL_LOADERS: Record<ToolComponent, Loader> = {
   'page-numbers': () => import('./PageNumbers.svelte'),
   watermark: () => import('./Watermark.svelte'),
   ocr: () => import('./Ocr.svelte'),
-  redact: placeholder,
+  redact: () => import('./Redact.svelte'),
   'pdf-to-text': () => import('./PdfToText.svelte'),
 };
 
