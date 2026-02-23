@@ -15,6 +15,8 @@ Everything shipped to the browser is permissive; nothing is copyleft.
 | @tesseract.js-data/eng | 1.0.0 | MIT (package); tessdata models are Apache-2.0 | `/vendor/tesseract/lang/` |
 | @tesseract.js-data/hin | 1.0.0 | MIT (package); tessdata models are Apache-2.0 | `/vendor/tesseract/lang/` |
 | fflate | 0.8.3 | MIT | bundled JS |
+| docx | 9.16.0 | MIT | bundled JS (PDF to Word chunk only); added in WS3 |
+| nanoid (via docx) | 6.0.2 | MIT | bundled JS with docx |
 | svelte | 5.59.1 | MIT | bundled JS |
 | workbox-precaching | 7.4.1 | MIT | bundled into `sw.js` |
 | workbox-window | 7.4.1 | MIT | bundled JS |
