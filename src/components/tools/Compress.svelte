@@ -10,7 +10,8 @@
   import { intakePdf } from '../../lib/password-prompt.svelte';
   import { formatBytes, suffixed } from '../../lib/download';
   import { createWorkerClient, isAbortError } from '../../lib/worker-rpc';
-  import { QPDF_COMPRESS_ARGS, compressPdf, type CompressLevel } from '../../core/compress';
+  import { QPDF_COMPRESS_ARGS, compressPdf, recompressImages, type CompressLevel, type CompressOptions } from '../../core/compress';
+  import { createReencoder, domBackend, offscreenBackend } from '../../lib/jpeg-reencode';
   import type { CompressWorkerApi } from '../../workers/compress.worker';
   import type { ToolProps } from './index';
 
@@ -21,9 +22,24 @@
   );
   onDestroy(() => worker.terminate());
 
+  // Whether the worker can re-encode (OffscreenCanvas in workers); learnt at warm-up.
+  let workerCanEncode = true;
+
   /** Loads the worker (and its pdf-lib chunk) and qpdf before a file can be added. */
   function warmup(): Promise<unknown> {
-    return Promise.all([worker.call('ping', []), getQpdf()]);
+    return Promise.all([
+      worker
+        .call('ping', [])
+        .then((r) => (workerCanEncode = r.offscreen))
+        .catch(() => (workerCanEncode = false)),
+      getQpdf(),
+    ]);
+  }
+
+  /** Step 1 on the main thread, for browsers without OffscreenCanvas in workers. */
+  function recompressHere(bytes: Uint8Array, opts: CompressOptions, signal: AbortSignal) {
+    const reencode = createReencoder(offscreenBackend() ?? domBackend());
+    return recompressImages(bytes, opts, reencode, (done, total) => (progress = { done, total, label: 'Compressing images' }), signal);
   }
 
   let file = $state<{ name: string; bytes: Uint8Array; pages: number } | null>(null);
@@ -73,6 +89,7 @@
         { level, grayscale: level === 'strong' && grayscale },
         {
           recompress: (bytes, opts) => {
+            if (!workerCanEncode) return recompressHere(bytes, opts, signal);
             const copy = bytes.slice();
             return worker.call('recompress', [copy, opts], {
               signal,
