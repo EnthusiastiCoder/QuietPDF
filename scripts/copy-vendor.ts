@@ -62,4 +62,6 @@ for (const c of COPIES) {
     filter: (s) => !c.filter || s === src || c.filter(s.slice(src.length + 1)),
   });
 }
+// Fonts committed in assets/fonts (subsets with their OFL notices).
+cpSync(join(root, 'assets', 'fonts'), join(out, 'fonts'), { recursive: true });
 console.log(`copy-vendor: ${(dirSize(out) / 1048576).toFixed(1)} MiB into public/vendor`);
