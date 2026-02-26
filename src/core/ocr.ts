@@ -8,8 +8,8 @@
  * later language switch (worker.reinitialize) fetches nothing: tesseract.js
  * only loads languages it does not already have.
  *
- * Limitation: the text layer uses the standard Helvetica font (WinAnsi), so
- * Devanagari words are left out of the searchable PDF. The .txt output keeps
+ * The text layer uses Helvetica; Devanagari words use an embedded subset of
+ * Noto Sans Devanagari (SIL OFL, see assets/fonts). The .txt output keeps
  * them.
  */
 import type { PDFDocumentProxy } from 'pdfjs-dist';
@@ -29,6 +29,7 @@ import {
   type PDFFont,
   type PDFPage,
 } from 'pdf-lib';
+import fontkit from '@pdf-lib/fontkit';
 import { TESSERACT_OPTIONS, type OcrLang } from '../lib/tesseract-setup';
 import { renderPage } from '../lib/pdfjs-setup';
 
@@ -144,6 +145,22 @@ export async function recognize(image: HTMLCanvasElement, lang: OcrLanguage): Pr
 
 // ------------------------------------------------------------ text layer
 
+const DEVANAGARI = /[ऀ-ॿ]/;
+export const DEVANAGARI_FONT_URL = '/vendor/fonts/noto-sans-devanagari-subset.ttf';
+let devaFontBytes: Promise<Uint8Array> | null = null;
+
+/** Loads the Devanagari font (Noto Sans Devanagari subset, OFL) into memory. Call on page load. */
+export function prefetchDevanagariFont(): Promise<Uint8Array> {
+  if (!devaFontBytes) {
+    devaFontBytes = fetch(DEVANAGARI_FONT_URL).then(async (r) => {
+      if (!r.ok) throw new Error(`font ${r.status}`);
+      return new Uint8Array(await r.arrayBuffer());
+    });
+    devaFontBytes.catch(() => (devaFontBytes = null));
+  }
+  return devaFontBytes;
+}
+
 /** Maps a pixel point of the recognised image to PDF user space. */
 export type ToPdf = (x: number, y: number) => [number, number];
 
@@ -152,10 +169,11 @@ export type ToPdf = (x: number, y: number) => [number, number];
  * fitted to the word's box width, rotated with the page if needed. Words the
  * font cannot encode are skipped. Returns how many words were written.
  */
-export function addInvisibleText(page: PDFPage, font: PDFFont, ocr: OcrPage, toPdf: ToPdf): number {
+export function addInvisibleText(page: PDFPage, font: PDFFont, ocr: OcrPage, toPdf: ToPdf, devaFont?: PDFFont): number {
   const ctx = page.doc.context;
   page.node.wrapContentStreams(ctx.getPushGraphicsStateContentStream(), ctx.getPopGraphicsStateContentStream());
   const fontKey = page.node.newFontDictionary(font.name, font.ref);
+  const devaKey = devaFont ? page.node.newFontDictionary(devaFont.name, devaFont.ref) : undefined;
   const ops = [pushGraphicsState(), beginText(), setTextRenderingMode(TextRenderingMode.Invisible)];
   let written = 0;
   for (const line of ocr.lines) {
@@ -164,11 +182,14 @@ export function addInvisibleText(page: PDFPage, font: PDFFont, ocr: OcrPage, toP
       const str = i < line.length - 1 ? `${word.text} ` : word.text;
       let encoded;
       let unit: number;
+      // Devanagari words use the embedded Unicode font; everything else stays Helvetica.
+      const useDeva = !!devaFont && DEVANAGARI.test(word.text);
+      const f = useDeva ? devaFont! : font;
       try {
-        encoded = font.encodeText(str);
-        unit = font.widthOfTextAtSize(word.text, 1);
+        encoded = f.encodeText(str);
+        unit = f.widthOfTextAtSize(word.text, 1);
       } catch {
-        return; // not in WinAnsi (e.g. Devanagari)
+        return; // a character neither font can encode
       }
       if (!(unit > 0)) return;
       const [ax, ay] = toPdf(word.x0, word.y1);
@@ -184,7 +205,7 @@ export function addInvisibleText(page: PDFPage, font: PDFFont, ocr: OcrPage, toP
       const vscale = height / size / 0.9;
       const baselineLift = height * 0.18;
       ops.push(
-        setFontAndSize(fontKey, size),
+        setFontAndSize(useDeva ? devaKey! : fontKey, size),
         setTextMatrix(cos, sin, -sin * vscale, cos * vscale, ax - sin * baselineLift, ay + cos * baselineLift),
         showText(encoded),
       );
@@ -253,8 +274,13 @@ export async function ocrDocument(bytes: Uint8Array, doc: PDFDocumentProxy, opts
 
   const out = await PDFDocument.load(bytes, { updateMetadata: false });
   const font = await out.embedFont(StandardFonts.Helvetica);
+  let devaFont: PDFFont | undefined;
+  if (results.some((r) => r?.lines.some((l) => l.some((w) => DEVANAGARI.test(w.text))))) {
+    out.registerFontkit(fontkit);
+    devaFont = await out.embedFont(await prefetchDevanagariFont(), { subset: true });
+  }
   out.getPages().forEach((p, i) => {
-    if (results[i]) addInvisibleText(p, font, results[i], toPdfs[i]);
+    if (results[i]) addInvisibleText(p, font, results[i], toPdfs[i], devaFont);
   });
   return { bytes: await out.save(), text };
 }
