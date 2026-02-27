@@ -13,7 +13,7 @@
   import { baseName, formatBytes, suffixed } from '../../lib/download';
   import { hasHandoff, takeHandoff } from '../../lib/handoff';
   import { isAbortError } from '../../lib/worker-rpc';
-  import { ocrDocument, warmOcrPool, type OcrLanguage, type OcrOutput } from '../../core/ocr';
+  import { ocrDocument, prefetchDevanagariFont, warmOcrPool, type OcrLanguage, type OcrOutput } from '../../core/ocr';
   import type { ToolProps } from './index';
 
   let { accept, multiple }: ToolProps = $props();
@@ -36,7 +36,7 @@
   });
 
   /** Both languages are loaded on page load, so OCR never fetches after a file is added. */
-  const warmup = () => warmOcrPool(['eng', 'hin']);
+  const warmup = () => Promise.all([warmOcrPool(['eng', 'hin']), prefetchDevanagariFont().catch(() => null)]);
 
   onMount(() => {
     if (!hasHandoff()) return;
