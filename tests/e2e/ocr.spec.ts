@@ -56,4 +56,17 @@ test.describe('WS3 OCR', () => {
     const out = await ocr(page, 'scanned-hi.pdf', 'Text (.txt)', 'Hindi');
     expect(utf8(out.bytes)).toContain('नमस्ते');
   });
+
+  test('T-OCR4b Hindi searchable PDF: the text layer contains "नमस्ते" and nothing is requested after the file is added', async ({ page, net, browserName }) => {
+    test.skip(browserName !== 'chromium', 'chromium only');
+    await openTool(page, TOOLS.ocr);
+    const mark = net.mark();
+    await addFiles(page, [fixturePath('scanned-hi.pdf')]);
+    await pick(page, 'Language', 'Hindi');
+    await pick(page, 'Output', 'Searchable PDF');
+    const out = await runAndDownload(page, { timeout: 150_000 });
+    const [text] = await pageTexts(out.bytes);
+    expect(text).toContain('नमस्ते');
+    expect(net.requestsSince(mark), 'no request after the file was added').toEqual([]);
+  });
 });
