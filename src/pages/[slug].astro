@@ -6,7 +6,9 @@
  * bootstrap script would break `script-src 'self'`).
  */
 import Base from '../layouts/Base.astro';
+import SeoHead from '../components/SeoHead.astro';
 import { allToolRoutes, toolById, type ToolRoute } from '../content/tools';
+import { LANDING } from '../content/landing';
 
 export function getStaticPaths() {
   return allToolRoutes().map((route) => ({ params: { slug: route.slug }, props: { route } }));
@@ -22,9 +24,40 @@ const title = route.slug === tool.slug ? tool.title : `${route.h1} - free, priva
 const description =
   route.slug === tool.slug ? tool.description : `${route.summary} Runs entirely in your browser: no upload, no signup, no limits.`;
 const canonical = `/${route.canonical ?? route.slug}`;
+const { howTo, faqs } = LANDING[tool.id];
+const site = Astro.site!.href.replace(/\/$/, '');
+const pageUrl = `${site}/${route.slug}`;
+const graph = [
+  {
+    '@type': 'SoftwareApplication',
+    name: `QuietPDF ${route.h1}`,
+    url: pageUrl,
+    description,
+    applicationCategory: 'UtilitiesApplication',
+    operatingSystem: 'Any (web browser)',
+    offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+  },
+  {
+    '@type': 'HowTo',
+    name: `How to use ${route.h1}`,
+    step: howTo.map((text, i) => ({ '@type': 'HowToStep', position: i + 1, text })),
+  },
+  {
+    '@type': 'FAQPage',
+    mainEntity: faqs.map((x) => ({ '@type': 'Question', name: x.q, acceptedAnswer: { '@type': 'Answer', text: x.a } })),
+  },
+  {
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'QuietPDF', item: `${site}/` },
+      { '@type': 'ListItem', position: 2, name: route.h1, item: pageUrl },
+    ],
+  },
+];
 ---
 
 <Base title={title} description={description} canonical={canonical}>
+  <SeoHead slot="head" title={title} description={description} path={canonical} image={`${tool.slug}.png`} graph={graph} />
   <section class="tool-head">
     <h1>{route.h1}</h1>
     <p class="summary">{route.summary}</p>
@@ -38,6 +71,26 @@ const canonical = `/${route.canonical ?? route.slug}`;
     data-multiple={tool.multiple ? 'true' : 'false'}
   >
   </div>
+  <section class="info" aria-labelledby="howto-h">
+    <h2 id="howto-h">How to use {route.h1}</h2>
+    <ol>{howTo.map((step) => <li>{step}</li>)}</ol>
+  </section>
+  <section class="info" aria-labelledby="why-h">
+    <h2 id="why-h">Why it is private</h2>
+    <p>
+      Your file never leaves this device. QuietPDF is a static site: there is no server that could receive an upload, and its
+      security policy blocks every request to another site. <a href="/privacy">Verify it yourself</a>.
+    </p>
+  </section>
+  <section class="info" aria-labelledby="faq-h">
+    <h2 id="faq-h">Frequently asked questions</h2>
+    {faqs.map((x) => (
+      <details>
+        <summary>{x.q}</summary>
+        <p>{x.a}</p>
+      </details>
+    ))}
+  </section>
 </Base>
 
 <script>
@@ -62,6 +115,14 @@ const canonical = `/${route.canonical ?? route.slug}`;
 </script>
 
 <style>
+  .info {
+    max-width: 42rem;
+    padding: var(--space-4) 0 0;
+  }
+  .info summary {
+    cursor: pointer;
+    padding: var(--space-2) 0;
+  }
   .tool-head {
     padding: var(--space-4) 0 var(--space-3);
   }
