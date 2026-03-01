@@ -1,15 +1,31 @@
 ---
 import Base from '../layouts/Base.astro';
+import SeoHead from '../components/SeoHead.astro';
+
+const title = 'A private Smallpdf alternative that never uploads your files | QuietPDF';
+const description = 'QuietPDF does what Smallpdf does, in your browser: free, no signup, no upload, no limits. Compared with dated, cited facts.';
+const sources = [
+  { url: 'https://smallpdf.com/pricing', label: 'Smallpdf pricing', date: '2026-11-22', note: 'the free plan lists limited document downloads and a daily download limit on most tools, with no number shown; Edit Text, strong compression and OCR are paid.' },
+];
 ---
 
-<Base
-  title="A private Smallpdf alternative that never uploads your files | QuietPDF"
-  description="QuietPDF does what Smallpdf does, in your browser: free, no signup, no upload, no limits."
->
+<Base title={title} description={description} canonical="/smallpdf-alternative">
+  <SeoHead slot="head" title={title} description={description} path="/smallpdf-alternative" />
   <article class="prose">
     <h1>A private Smallpdf alternative</h1>
-    <p>QuietPDF covers the everyday Smallpdf tools, but your files never leave your device: every tool runs in your browser.</p>
-    <p><a href="/">See all tools</a></p>
+    <p>QuietPDF covers the everyday Smallpdf tools, but your files never leave your device: every tool runs in your browser, with no signup and no limits.</p>
+    <h2>What differs</h2>
+    <ul>
+      <li>Smallpdf limits free downloads per day; QuietPDF has no daily limit.</li>
+      <li>Smallpdf charges for OCR and strong compression; QuietPDF includes both for free.</li>
+      <li>QuietPDF never uploads your files, and you can verify that in your browser.</li>
+    </ul>
+    <p><a href="/">See all QuietPDF tools</a> or <a href="/privacy">verify the privacy claim yourself</a>.</p>
+    <h2>Sources</h2>
+    <p>Facts about Smallpdf are read from its own pages. Each source shows the date it was checked.</p>
+    <ul>
+      {sources.map((s) => <li><a href={s.url} rel="noopener noreferrer">{s.label}</a> (checked {s.date}): {s.note}</li>)}
+    </ul>
   </article>
 </Base>
 
