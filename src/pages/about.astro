@@ -1,12 +1,24 @@
 ---
 import Base from '../layouts/Base.astro';
+import SeoHead from '../components/SeoHead.astro';
+
+const title = 'About QuietPDF';
+const description = 'QuietPDF is a free set of PDF tools that run entirely in your browser, with no uploads and no signup.';
 ---
 
-<Base title="About QuietPDF" description="QuietPDF is a free set of PDF tools that run entirely in your browser, with no uploads and no signup.">
+<Base title={title} description={description} canonical="/about">
+  <SeoHead slot="head" title={title} description={description} path="/about" />
   <article class="prose">
     <h1>About QuietPDF</h1>
     <p>QuietPDF is a free set of PDF tools that run entirely in your browser. No uploads, no signup, no watermarks, and it keeps working offline once loaded.</p>
-    <p>More about how it is built is coming soon.</p>
+    <h2>How it works</h2>
+    <p>
+      The tools are static web pages with the PDF, OCR and encryption engines compiled to WebAssembly and served from this site. Your file is read into your browser's
+      memory, processed there and handed back as a download. A strict Content-Security-Policy stops the page connecting to any other site.
+    </p>
+    <h2>Check it yourself</h2>
+    <p>You do not have to trust this page. <a href="/privacy">Verify it yourself</a> in your browser's Network tab, or turn on airplane mode and watch the tools keep working.</p>
+    <p>Built by Arpan Mandal. &copy; Arpan Mandal. All Rights Reserved.</p>
   </article>
 </Base>
 
