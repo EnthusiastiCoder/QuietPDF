@@ -1,5 +1,6 @@
 ---
 import Base from '../layouts/Base.astro';
+import SeoHead from '../components/SeoHead.astro';
 import { CATEGORIES, toolsInDemandOrder } from '../content/tools';
 
 const tools = toolsInDemandOrder();
@@ -12,6 +13,12 @@ const groups = CATEGORIES.map((c) => ({ ...c, tools: tools.filter((t) => t.categ
   description="Merge, compress, convert, split, sign and OCR PDFs in your browser. Nothing is uploaded: your files stay on your device. Free, no signup, works offline."
   canonical="/"
 >
+  <SeoHead
+    slot="head"
+    title="QuietPDF - free PDF tools that never upload your files"
+    description="Merge, compress, convert, split, sign and OCR PDFs in your browser. Nothing is uploaded: your files stay on your device. Free, no signup, works offline."
+    path="/"
+  />
   <section class="hero">
     <h1>PDF tools that never upload your files</h1>
     <p class="lead">Everything runs in your browser. Free, no signup, no limits, and it keeps working offline.</p>
