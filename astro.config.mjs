@@ -1,6 +1,7 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
 import svelte from '@astrojs/svelte';
+import sitemap from '@astrojs/sitemap';
 import { AstroPWAIntegration } from '@vite-pwa/astro';
 
 const site = process.env.SITE_URL || 'https://quietpdf.pages.dev';
@@ -21,6 +22,10 @@ export default defineConfig({
   },
   integrations: [
     svelte(),
+    // Every indexable route; the 404 and the alias routes (which canonicalise to a main tool) are left out.
+    sitemap({
+      filter: (page) => !/\/(404|image-to-pdf|png-to-pdf|pdf-to-png)\/?$/.test(page),
+    }),
     // PWA (decision 6): custom service worker (src/sw.ts), registered by
     // src/lib/sw-register.ts (no injected inline registration script).
     AstroPWAIntegration({
