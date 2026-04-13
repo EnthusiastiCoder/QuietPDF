@@ -16,7 +16,7 @@ const files = ['The HTML page you opened', 'Its bundled JavaScript and CSS under
     <h1>Privacy</h1>
     <p>
       QuietPDF processes every file inside your browser. Your files are never uploaded: there is no server that could receive them. There are no
-      accounts, no analytics, no cookies and no third-party requests.
+      accounts, no analytics, no cookies and no third-party requests. The only thing the page remembers is your light or dark theme choice, in sessionStorage for this tab (not a cookie).
     </p>
 
     <h2>Verify it yourself</h2>
@@ -24,7 +24,7 @@ const files = ['The HTML page you opened', 'Its bundled JavaScript and CSS under
     <ol>
       <li>Open your browser's developer tools (F12) and switch to the Network tab.</li>
       <li>Add a file to any tool and run it.</li>
-      <li>Nothing new appears after you add the file. Every request you do see went to this site only, and none carries your file.</li>
+      <li>Nothing new appears after you add the file. The one exception is OCR, which fetches its language data from this same site the first time you run it. Every request you do see went to this site only, and none carries your file.</li>
     </ol>
     <h3>2. The airplane-mode test</h3>
     <ol>
@@ -36,7 +36,7 @@ const files = ['The HTML page you opened', 'Its bundled JavaScript and CSS under
     <p>The meter at the bottom of every page counts third-party requests and uploaded bytes live. Both stay at zero.</p>
 
     <h2>The Content-Security-Policy</h2>
-    <p>The browser enforces this policy, sent as a header with every page. It forbids connecting to any other site, so a file could not be sent out even by a bug:</p>
+    <p>The browser enforces this policy, sent as a header with every page. It stops scripts from connecting to any other site:</p>
     <pre class="csp"><code>{csp}</code></pre>
     <ul>
       <li><code>connect-src 'self'</code>: scripts can only talk to this site.</li>
