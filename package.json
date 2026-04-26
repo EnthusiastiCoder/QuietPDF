@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "astro dev",
-    "prebuild": "node scripts/copy-vendor.ts",
+    "prebuild": "node scripts/copy-vendor.ts && node scripts/gen-notices.ts",
     "build": "astro build",
     "preview": "node scripts/preview.ts",
     "fixtures": "node scripts/make-fixtures.ts",
