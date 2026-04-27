@@ -13,3 +13,4 @@ tests/fixtures/.gen/
 test-results/
 playwright-report/
 .env*
+public/third-party-licenses.txt
