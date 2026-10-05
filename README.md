@@ -1,6 +1,6 @@
 # QuietPDF
 
-Free PDF tools that run entirely in your browser. Your files never leave your device: there are no uploads, no accounts, no ads, no analytics and no cookies.
+Free PDF tools that run entirely in your browser. Your files never leave your device: nothing is uploaded, no accounts, no ads, no analytics and no cookies.
 
 ![Home page](docs/screenshots/home.png)
 
@@ -11,7 +11,7 @@ You do not have to take our word for it.
 - A strict Content-Security-Policy (`connect-src 'self'`, `script-src 'self'`) forbids requests to any other origin.
 - Every engine (pdf.js, qpdf, Tesseract) and every font is self-hosted. Nothing loads from a CDN.
 - The privacy meter at the bottom of every page counts third-party requests and uploaded bytes live. Both stay at zero.
-- Open DevTools, then Network, add a file and watch: after the page loads, no request is made.
+- Open DevTools, then Network, add a file and watch: no request leaves this site and none carries your file. OCR fetches its language data from this site on first use.
 - `npm run check:third-party` scans the built site for any off-origin reference.
 - The app works offline after the first visit (PWA).
 
